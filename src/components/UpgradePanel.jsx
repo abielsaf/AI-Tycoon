@@ -1,12 +1,14 @@
 import { useGameStore, upgradeReqMet } from '../store/gameStore'
 import { UPGRADES } from '../data/upgrades'
 import { fmtMoney } from '../utils/format'
+import { t, tc } from '../i18n'
 
 export default function UpgradePanel() {
   const owned = useGameStore((s) => s.upgrades)
   const money = useGameStore((s) => s.money)
   const buy = useGameStore((s) => s.buyUpgrade)
   const buyAll = useGameStore((s) => s.buyAllUpgrades)
+  const lang = useGameStore((s) => s.lang)
   const state = useGameStore()
 
   const available = UPGRADES.filter(
@@ -19,7 +21,8 @@ export default function UpgradePanel() {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-xs font-bold uppercase tracking-widest text-fuchsia-500/70">
-          Upgrades <span className="text-slate-600">({owned.length} owned)</span>
+          {t(lang, 'upgrades')}{' '}
+          <span className="text-slate-600">{t(lang, 'ownedN', { n: owned.length })}</span>
         </h2>
         <button
           onClick={buyAll}
@@ -30,12 +33,12 @@ export default function UpgradePanel() {
               : 'cursor-not-allowed border border-fuchsia-500/20 text-slate-600'
           }`}
         >
-          BUY ALL{affordableCount > 0 ? ` (${affordableCount})` : ''}
+          {t(lang, 'buyAll')}{affordableCount > 0 ? ` (${affordableCount})` : ''}
         </button>
       </div>
       {available.length === 0 && (
         <p className="px-1 text-[11px] text-slate-500">
-          No upgrades available yet — buy more hardware to unlock them.
+          {t(lang, 'noUpgrades')}
         </p>
       )}
       {available.map((u) => {
@@ -52,8 +55,12 @@ export default function UpgradePanel() {
             }`}
           >
             <div className="min-w-0 flex-1">
-              <div className="truncate font-semibold text-slate-100">{u.name}</div>
-              <div className="truncate text-[11px] text-slate-400">{u.desc}</div>
+              <div className="truncate font-semibold text-slate-100">
+                {tc(lang, 'upgrades', u.id, 'name', u.name)}
+              </div>
+              <div className="truncate text-[11px] text-slate-400">
+                {tc(lang, 'upgrades', u.id, 'desc', u.desc)}
+              </div>
             </div>
             <div
               className={`mono shrink-0 text-sm font-bold ${affordable ? 'text-fuchsia-300' : 'text-slate-500'}`}

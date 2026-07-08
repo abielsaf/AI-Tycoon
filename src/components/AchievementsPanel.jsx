@@ -1,13 +1,15 @@
 import { useGameStore } from '../store/gameStore'
 import { ACHIEVEMENTS } from '../data/achievements'
+import { t, tc } from '../i18n'
 
 export default function AchievementsPanel() {
   const unlocked = useGameStore((s) => s.achievements)
+  const lang = useGameStore((s) => s.lang)
 
   return (
     <div className="flex flex-col gap-2">
       <h2 className="px-1 text-xs font-bold uppercase tracking-widest text-amber-500/70">
-        Achievements{' '}
+        {t(lang, 'achievements')}{' '}
         <span className="text-slate-600">
           ({unlocked.length}/{ACHIEVEMENTS.length})
         </span>
@@ -27,9 +29,11 @@ export default function AchievementsPanel() {
               <div
                 className={`text-xs font-semibold ${got ? 'text-amber-300' : 'text-slate-400'}`}
               >
-                {got ? '🏆' : '🔒'} {a.name}
+                {got ? '🏆' : '🔒'} {tc(lang, 'achievements', a.id, 'name', a.name)}
               </div>
-              <div className="text-[10px] text-slate-500">{a.desc}</div>
+              <div className="text-[10px] text-slate-500">
+                {tc(lang, 'achievements', a.id, 'desc', a.desc)}
+              </div>
             </div>
           )
         })}

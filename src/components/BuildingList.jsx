@@ -1,6 +1,7 @@
 import { useGameStore, buildingCost, bulkCost, maxAffordable, sellValue } from '../store/gameStore'
 import { BUILDINGS } from '../data/buildings'
 import { fmt, fmtMoney } from '../utils/format'
+import { t, tc } from '../i18n'
 
 function Row({ b }) {
   const owned = useGameStore((s) => s.buildings[b.id] || 0)
@@ -9,6 +10,7 @@ function Row({ b }) {
   const buyMode = useGameStore((s) => s.buyMode)
   const buy = useGameStore((s) => s.buyBuilding)
   const sell = useGameStore((s) => s.sellBuilding)
+  const lang = useGameStore((s) => s.lang)
 
   // hide buildings well beyond reach until the player is close (progressive reveal)
   const revealed = owned > 0 || money >= b.baseCost * 0.4
@@ -46,15 +48,19 @@ function Row({ b }) {
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline gap-2">
-            <span className="truncate font-semibold text-slate-100">{b.name}</span>
+            <span className="truncate font-semibold text-slate-100">
+              {tc(lang, 'buildings', b.id, 'name', b.name)}
+            </span>
             <span className="mono text-xs text-emerald-400/70">×{owned}</span>
             {affordableAll.count > 0 && (
               <span className="mono text-[10px] text-slate-500">
-                (can buy {affordableAll.count})
+                ({t(lang, 'canBuy', { n: affordableAll.count })})
               </span>
             )}
           </div>
-          <div className="truncate text-[11px] text-slate-400">{b.desc}</div>
+          <div className="truncate text-[11px] text-slate-400">
+            {tc(lang, 'buildings', b.id, 'desc', b.desc)}
+          </div>
           <div className="mono mt-0.5 flex gap-3 text-[10px] text-slate-500">
             {b.flops > 0 && <span className="text-cyan-400/70">{fmt(b.flops)} FLOPS/s</span>}
             {b.cooling > 0 && <span className="text-sky-400/70">+{fmt(b.cooling)} cooling</span>}
@@ -68,17 +74,19 @@ function Row({ b }) {
             {fmtMoney(affordable ? cost : nextCost)}
           </div>
           {qty > 1 && (
-            <div className="mono text-[10px] text-emerald-400/60">buy ×{qty}</div>
+            <div className="mono text-[10px] text-emerald-400/60">
+              {t(lang, 'buyQty', { n: qty })}
+            </div>
           )}
         </div>
       </button>
       {owned > 0 && (
         <button
           onClick={() => sell(b.id, sellQty)}
-          title={`Sell ${sellQty} for ${fmtMoney(refund)}`}
+          title={`${t(lang, 'sell')} ${sellQty} — ${fmtMoney(refund)}`}
           className="flex shrink-0 flex-col items-center justify-center border-l border-slate-700/40 px-2.5 text-rose-300/70 transition hover:bg-rose-900/30 hover:text-rose-200"
         >
-          <span className="text-xs font-bold leading-none">Sell</span>
+          <span className="text-xs font-bold leading-none">{t(lang, 'sell')}</span>
           <span className="mono text-[10px] leading-tight">
             ×{sellQty}
           </span>
@@ -119,11 +127,12 @@ function ModeToggle() {
 }
 
 export default function BuildingList() {
+  const lang = useGameStore((s) => s.lang)
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between px-1">
         <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-500/70">
-          Hardware
+          {t(lang, 'hardware')}
         </h2>
         <ModeToggle />
       </div>

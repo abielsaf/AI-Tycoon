@@ -1,0 +1,269 @@
+// Lightweight i18n. English is the source of truth (also lives inline in the
+// data/ files); Spanish is an override layer here. Missing ES strings fall back
+// to English automatically. No dependency — just dictionaries + two helpers.
+//
+//   t(lang, key, vars)                -> UI string, {var} interpolation
+//   tc(lang, kind, id, field, en)     -> localized content field, else `en`
+
+export const LANGS = ['en', 'es']
+
+const UI = {
+  en: {
+    guide: 'Guide',
+    muteOn: 'Mute event sounds',
+    muteOff: 'Unmute event sounds',
+    save: '💾 Save',
+    export: '⬇ Export',
+    import: '⬆ Import',
+    reset: '🗑 Reset',
+    saved: 'Saved ✓',
+    imported: 'Save imported ✓',
+    importFailed: 'Import failed ✗',
+    wiped: 'Progress wiped',
+    wipeConfirm: 'Wipe all progress and start over? This cannot be undone.',
+    statMoney: 'Money',
+    statPerSec: '$ / sec',
+    statFlops: 'FLOPS / sec',
+    statLifetime: 'Lifetime FLOPS',
+    statInsights: 'AI Insights',
+    thermals: 'Thermals',
+    heat: 'heat',
+    throttled: 'THROTTLED',
+    live: 'Live',
+    hardware: 'Hardware',
+    canBuy: 'can buy {n}',
+    buyQty: 'buy ×{n}',
+    sell: 'Sell',
+    upgrades: 'Upgrades',
+    ownedN: '({n} owned)',
+    buyAll: 'BUY ALL',
+    noUpgrades: 'No upgrades available yet — buy more hardware to unlock them.',
+    compute: 'Compute',
+    perClick: 'FLOPS / click',
+    achievements: 'Achievements',
+    singularity: 'Singularity',
+    insightsOwned: '{n} 🧿 Insights',
+    resetDescA: 'Reset all hardware, upgrades and money for permanent',
+    insightsFull: 'AI Insights',
+    resetDescB: 'to spend below.',
+    resetNow: 'Reset now for',
+    insightsWord: 'Insights',
+    confirmReset: 'Confirm Reset',
+    cancel: 'Cancel',
+    triggerSingularity: 'Trigger Singularity',
+    unlocksAt: 'Unlocks at {n} lifetime FLOPS ({cur} so far)',
+    ascensionTree: 'Ascension Tree',
+    skins: 'Skins',
+    maxed: 'MAXED',
+    skip: 'Skip',
+    back: 'Back',
+    next: 'Next',
+    letsGo: "Let's go",
+    welcomeBack: 'Welcome back!',
+    offlineRan: 'Your datacenter ran for {time} while you were away (at reduced efficiency).',
+    collect: 'Collect',
+    footerTagline: 'Autosaves every 10s · built with React + Zustand · click the terminal to generate compute',
+    createdBy: 'Created by',
+    // news templates
+    newsPurchased: '✅ Purchased: {name}',
+    newsPurchasedN: '✅ Purchased {n} upgrades',
+    newsAch: '🏆 Achievement unlocked: {name}',
+    newsReset: '🌌 Singularity Reset! +{n} AI Insights.',
+  },
+  es: {
+    guide: 'Guía',
+    muteOn: 'Silenciar sonidos de eventos',
+    muteOff: 'Activar sonidos de eventos',
+    save: '💾 Guardar',
+    export: '⬇ Exportar',
+    import: '⬆ Importar',
+    reset: '🗑 Reiniciar',
+    saved: 'Guardado ✓',
+    imported: 'Partida importada ✓',
+    importFailed: 'Fallo al importar ✗',
+    wiped: 'Progreso borrado',
+    wipeConfirm: '¿Borrar todo el progreso y empezar de nuevo? Esto no se puede deshacer.',
+    statMoney: 'Dinero',
+    statPerSec: '$ / seg',
+    statFlops: 'FLOPS / seg',
+    statLifetime: 'FLOPS Totales',
+    statInsights: 'Perspectivas IA',
+    thermals: 'Térmicas',
+    heat: 'calor',
+    throttled: 'LIMITADO',
+    live: 'En Vivo',
+    hardware: 'Hardware',
+    canBuy: 'puedes comprar {n}',
+    buyQty: 'comprar ×{n}',
+    sell: 'Vender',
+    upgrades: 'Mejoras',
+    ownedN: '({n} obtenidas)',
+    buyAll: 'COMPRAR TODO',
+    noUpgrades: 'No hay mejoras disponibles aún — compra más hardware para desbloquearlas.',
+    compute: 'Cómputo',
+    perClick: 'FLOPS / clic',
+    achievements: 'Logros',
+    singularity: 'Singularidad',
+    insightsOwned: '{n} 🧿 Perspectivas',
+    resetDescA: 'Reinicia todo el hardware, mejoras y dinero por',
+    insightsFull: 'Perspectivas de IA',
+    resetDescB: 'permanentes para gastar abajo.',
+    resetNow: 'Reinicia ahora por',
+    insightsWord: 'Perspectivas',
+    confirmReset: 'Confirmar Reinicio',
+    cancel: 'Cancelar',
+    triggerSingularity: 'Activar Singularidad',
+    unlocksAt: 'Se desbloquea a {n} FLOPS totales ({cur} hasta ahora)',
+    ascensionTree: 'Árbol de Ascensión',
+    skins: 'Skins',
+    maxed: 'MÁXIMO',
+    skip: 'Saltar',
+    back: 'Atrás',
+    next: 'Siguiente',
+    letsGo: '¡Vamos!',
+    welcomeBack: '¡Bienvenido de vuelta!',
+    offlineRan: 'Tu centro de datos funcionó {time} mientras no estabas (a eficiencia reducida).',
+    collect: 'Recolectar',
+    footerTagline: 'Guardado automático cada 10s · hecho con React + Zustand · haz clic en la terminal para generar cómputo',
+    createdBy: 'Creado por',
+    newsPurchased: '✅ Comprado: {name}',
+    newsPurchasedN: '✅ Compradas {n} mejoras',
+    newsAch: '🏆 Logro desbloqueado: {name}',
+    newsReset: '🌌 ¡Reinicio de Singularidad! +{n} Perspectivas de IA.',
+  },
+}
+
+// Spanish content overrides. Keyed by kind -> id -> field. English is the
+// fallback (passed in from the data files), so only ES needs to live here.
+const CONTENT = {
+  es: {
+    buildings: {
+      pi: { name: 'Raspberry Pi', desc: 'Una pequeña SBC procesando números en una caja de zapatos.' },
+      office_pc: { name: 'PC de Oficina Usado', desc: 'Descartes corporativos reacondicionados. Suficientemente fiables.' },
+      gaming_rig: { name: 'Equipo Gamer', desc: 'RGB por todas partes. Sorprendentemente bueno con matrices.' },
+      cooling_unit: { name: 'Unidad de Refrigeración', desc: 'Aire acondicionado industrial. Sin cómputo, solo aire frío.' },
+      server_rack: { name: 'Rack de Servidores', desc: 'Un muro de servidores blade pidiendo ventilación a gritos.' },
+      gpu_cluster: { name: 'Clúster de GPU', desc: 'Racks de aceleradores. La verdadera máquina de imprimir dinero.' },
+      datacenter_wing: { name: 'Ala de Centro de Datos', desc: 'Toda una sala de hardware. Has llegado.' },
+      quantum: { name: 'Prototipo Cuántico', desc: 'Superposición a tope. Funciona cerca del cero absoluto.' },
+      neuromorphic: { name: 'Arreglo Neuromórfico', desc: 'Chips inspirados en el cerebro que consumen poco y piensan en impulsos.' },
+      cryo_plant: { name: 'Planta Criogénica', desc: 'Circuitos de helio líquido. Sin cómputo — solo frío brutal y absoluto.' },
+      fusion_cluster: { name: 'Clúster de Fusión', desc: 'Trae tu propia estrella. Cómputo limitado solo por la física.' },
+      dyson_node: { name: 'Nodo de Enjambre Dyson', desc: 'Cómputo en órbita solar, bebiendo luz estelar.' },
+    },
+    upgrades: {
+      oc1: { name: 'Overclocking I', desc: 'Sube los relojes. +5 de poder de clic, pero más caliente.' },
+      oc2: { name: 'Overclocking II', desc: 'Destapa y repasta. Poder de clic x3.' },
+      ergo_mouse: { name: 'Ratón Ergonómico', desc: 'El túnel carpiano no es una estrategia de crecimiento. Poder de clic x2.' },
+      macro_script: { name: 'Script de Macros', desc: 'Definitivamente no es trampa. +50 de poder de clic.' },
+      undervolt: { name: 'Undervolting', desc: 'Menos voltaje, menos calor. Calor total -15%.' },
+      liquid_cooling: { name: 'Refrigeración Líquida', desc: 'Circuitos de agua por todos lados. Refrigeración x1.5.' },
+      immersion_cooling: { name: 'Refrigeración por Inmersión', desc: 'Sumerge los servidores en aceite mineral. Refrigeración x2.' },
+      iceland: { name: 'Mudarse a Islandia', desc: 'Aire ártico gratis y geotermia barata. +5,000,000 de refrigeración.' },
+      superconductor: { name: 'Refrigerante Superconductor', desc: 'Transferencia de calor sin resistencia. Refrigeración x2.' },
+      orbital_radiators: { name: 'Radiadores Orbitales', desc: 'Descarga el calor al vacío del espacio. +20B de refrigeración.' },
+      gpu_drivers: { name: 'Drivers Optimizados', desc: 'Deja de lanzar bugs de día uno. Clústeres de GPU x2.' },
+      cuda_opt: { name: 'Optimización CUDA', desc: 'Kernels afinados a mano. Clústeres de GPU x2 otra vez.' },
+      rack_density: { name: 'Racks de Alta Densidad', desc: 'Aprieta más blades por U. Racks de Servidores x2.' },
+      overhaul_pis: { name: 'Firmware de Clúster Pi', desc: 'Kernel personalizado para el enjambre de Pi. Raspberry Pis x3.' },
+      spiking_nets: { name: 'Redes Neuronales de Impulsos', desc: 'Inferencia por eventos. Arreglos Neuromórficos x2.' },
+      plasma_tuning: { name: 'Ajuste de Confinamiento de Plasma', desc: 'Exprime más cómputo por reactor. Clústeres de Fusión x2.' },
+      swarm_scaling: { name: 'Enjambre Autorreplicante', desc: 'Los nodos construyen más nodos. Nodos Dyson x2.' },
+      batch_jobs: { name: 'Programación por Lotes', desc: 'Mantén el silicio ocupado 24/7. Todos los FLOPS +25%.' },
+      train_llm: { name: 'Entrena Tu Propio LLM', desc: 'Vende inferencia en vez de cómputo bruto. Ingresos x1.5.' },
+      enterprise_sales: { name: 'Equipo de Ventas Empresarial', desc: 'Blazers y golf. Ingresos x2.' },
+      agi_research: { name: 'Laboratorio de Investigación AGI', desc: 'Los modelos se mejoran solos ahora. Todos los FLOPS x2.' },
+      caas: { name: 'Cómputo como Servicio', desc: 'Alquila cada ciclo libre. Ingresos x2.' },
+      recursive_si: { name: 'Automejora Recursiva', desc: 'El sistema reescribe su propio compilador. Todos los FLOPS x2.' },
+    },
+    events: {
+      ram_spike: { title: 'Suben los Precios de la RAM', headline: '📈 ¡Escasez de DRAM! Costos de hardware +40% por 60s.' },
+      crypto_crash: { title: 'Colapso Cripto', headline: '💥 Las cripto se hunden — los mineros venden GPUs. Hardware -30% por 60s.' },
+      ai_hype: { title: 'Ciclo de Hype de IA', headline: '🚀 ¡Todos quieren IA! Ingresos +50% por 60s.' },
+      viral_model: { title: 'Modelo Se Vuelve Viral', headline: '🔥 ¡Tu demo llega a la portada! FLOPS x2 por 45s.' },
+      heatwave: { title: 'Ola de Calor', headline: '🌡️ ¡Temperaturas récord! Refrigeración -25% por 60s.' },
+      grid_strain: { title: 'Tensión en la Red Eléctrica', headline: '⚡ Apagones en toda la región. Producción -30% por 45s.' },
+      vc_round: { title: 'Ronda de Financiación VC', headline: '💰 Un VC te acaba de transferir un cofre de guerra. ¡Inyección de efectivo!' },
+    },
+    achievements: {
+      first_click: { name: 'Hola, Mundo', desc: 'Genera tus primeros FLOPS a mano.' },
+      first_build: { name: 'A Darle al Rack', desc: 'Compra tu primer hardware.' },
+      ten_pis: { name: 'Enjambre Pi', desc: 'Ten 10 Raspberry Pis.' },
+      overheat: { name: 'Se Está Calentando', desc: 'Deja que el calor supere tu capacidad de refrigeración.' },
+      gpu_baron: { name: 'Barón de las GPU', desc: 'Ten 10 Clústeres de GPU.' },
+      millionaire: { name: 'Siete Cifras', desc: 'Acumula $1,000,000.' },
+      quantum_leap: { name: 'Salto Cuántico', desc: 'Construye un Prototipo Cuántico.' },
+      singularity: { name: 'Singularidad', desc: 'Realiza tu primer Reinicio de Singularidad.' },
+      billionaire: { name: 'Diez Cifras', desc: 'Acumula $1,000,000,000.' },
+      dyson: { name: 'Ambiciones Kardashev', desc: 'Construye un Nodo de Enjambre Dyson.' },
+    },
+    tree: {
+      overmind: { name: 'Supermente', desc: 'Todos los FLOPS ×1.25 por nivel.' },
+      deft: { name: 'Manos Hábiles', desc: 'Poder de clic ×2 por nivel.' },
+      cryo: { name: 'Maestría Criogénica', desc: 'Capacidad de refrigeración ×1.5 por nivel.' },
+      market: { name: 'Creador de Mercado', desc: 'Ingresos ×1.3 por nivel.' },
+      discount: { name: 'Ofertas por Volumen', desc: 'Hardware 6% más barato por nivel.' },
+      headstart: { name: 'Capital Semilla', desc: 'Empieza cada partida con ×8 más de efectivo por nivel.' },
+      offline: { name: 'Sincronización en la Nube', desc: '+8% de eficiencia sin conexión por nivel.' },
+    },
+    skins: {
+      matrix: { name: 'Matrix', desc: 'El clásico verde de terminal.' },
+      synthwave: { name: 'Synthwave', desc: 'Magenta y violeta neón.' },
+      inferno: { name: 'Infierno', desc: 'Naranja y rojo fundido.' },
+      arctic: { name: 'Ártico', desc: 'Azul eléctrico frío.' },
+      midas: { name: 'Midas', desc: 'Todo se convierte en oro.' },
+    },
+  },
+}
+
+// Flavor headlines per language (English also lives in data/events.js).
+export const FLAVOR = {
+  en: null, // use data/events FLAVOR_HEADLINES
+  es: [
+    'ÚLTIMA HORA: Startup afirma que la AGI está "a 18 meses", otra vez.',
+    'Analistas desconcertados mientras los FLOPS siguen subiendo.',
+    'Centro de datos en caja de zapatos ahora valorado en $4B.',
+    'Informe: el 90% de la IA es solo multiplicación de matrices y buena vibra.',
+    'Los revendedores de GPU reportan un trimestre récord.',
+    'Nuevo benchmark disponible. Todos son #1 en él.',
+    'Ingeniero de refrigeración gana premio, se sobrecalienta al instante.',
+    'Inversores preguntan qué es un "transformer", invierten igual.',
+    'El zumbido del centro de datos ahora se oye desde el espacio.',
+    'Un becario descubre que basta con agregar más GPUs.',
+  ],
+}
+
+// New-player guide steps per language. Emojis are language-neutral.
+const GUIDE = {
+  en: [
+    { emoji: '🧠', title: 'Welcome to AI Tycoon', body: 'You run a compute empire. Generate FLOPS (compute), which auto-sell for money. Reinvest in hardware to produce even more. Numbers go up.' },
+    { emoji: '🖥️', title: 'Click for Compute', body: 'Click the big terminal to generate FLOPS by hand. Early on this funds your very first machine — after that, hardware does the heavy lifting.' },
+    { emoji: '🏭', title: 'Buy Hardware', body: 'Hardware produces FLOPS automatically. Higher tiers are far more efficient per dollar. Use ×1 / ×10 / MAX to buy in bulk — and the Sell button to refund machines you no longer want.' },
+    { emoji: '🌡️', title: 'Mind the Heat', body: 'Every machine makes heat. If total heat exceeds your cooling capacity, production gets throttled. Buy Cooling Units and cooling upgrades to stay in the green.' },
+    { emoji: '⚡', title: 'Upgrades & Events', body: 'Upgrades are one-time boosts to clicks, production, cooling and revenue. Random market events temporarily buff or debuff you — watch the toast and the pill up top.' },
+    { emoji: '🌌', title: 'Ascend', body: 'Once you generate enough lifetime compute, trigger a Singularity Reset. You lose your run but gain AI Insights to spend on the permanent Ascension Tree — and unlock skins.' },
+  ],
+  es: [
+    { emoji: '🧠', title: 'Bienvenido a AI Tycoon', body: 'Diriges un imperio de cómputo. Genera FLOPS (cómputo), que se venden solos por dinero. Reinvierte en hardware para producir aún más. Los números suben.' },
+    { emoji: '🖥️', title: 'Clic para Cómputo', body: 'Haz clic en la terminal grande para generar FLOPS a mano. Al principio esto financia tu primera máquina — después, el hardware hace el trabajo pesado.' },
+    { emoji: '🏭', title: 'Compra Hardware', body: 'El hardware produce FLOPS automáticamente. Los niveles superiores son mucho más eficientes por dólar. Usa ×1 / ×10 / MAX para comprar en lote — y el botón Vender para reembolsar máquinas que ya no quieras.' },
+    { emoji: '🌡️', title: 'Cuida el Calor', body: 'Cada máquina genera calor. Si el calor total supera tu capacidad de refrigeración, la producción se limita. Compra Unidades de Refrigeración y mejoras para mantenerte en verde.' },
+    { emoji: '⚡', title: 'Mejoras y Eventos', body: 'Las mejoras son bonificaciones únicas para clics, producción, refrigeración e ingresos. Eventos de mercado aleatorios te potencian o perjudican temporalmente — mira el aviso y la píldora de arriba.' },
+    { emoji: '🌌', title: 'Asciende', body: 'Cuando generes suficiente cómputo total, activa un Reinicio de Singularidad. Pierdes tu partida pero ganas Perspectivas de IA para gastar en el Árbol de Ascensión permanente — y desbloquear skins.' },
+  ],
+}
+
+export function t(lang, key, vars) {
+  let s = (UI[lang] && UI[lang][key]) ?? UI.en[key] ?? key
+  if (vars) for (const k in vars) s = s.replaceAll(`{${k}}`, vars[k])
+  return s
+}
+
+export function tc(lang, kind, id, field, en) {
+  if (lang === 'en') return en
+  return CONTENT[lang]?.[kind]?.[id]?.[field] ?? en
+}
+
+export function guideSteps(lang) {
+  return GUIDE[lang] || GUIDE.en
+}

@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { fmt } from '../utils/format'
+import { t } from '../i18n'
 
 let floatId = 0
 
 export default function ClickArea() {
   const click = useGameStore((s) => s.click)
   const clickPower = useGameStore((s) => s.stats?.clickPower || 1)
+  const lang = useGameStore((s) => s.lang)
   const [floats, setFloats] = useState([])
   const areaRef = useRef(null)
 
@@ -34,10 +36,10 @@ export default function ClickArea() {
     >
       <div className="text-6xl">🖥️</div>
       <div className="mt-3 text-lg font-bold uppercase tracking-widest text-emerald-300">
-        Compute
+        {t(lang, 'compute')}
       </div>
       <div className="mono mt-1 text-sm text-emerald-500/70">
-        +{fmt(clickPower)} FLOPS / click
+        +{fmt(clickPower)} {t(lang, 'perClick')}
       </div>
       {floats.map((f) => (
         <span

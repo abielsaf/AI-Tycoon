@@ -60,6 +60,8 @@ export const EVENTS = [
   },
 ]
 
+export const EVENT_MAP = Object.fromEntries(EVENTS.map((e) => [e.id, e]))
+
 // Flavor headlines that scroll when no event is active.
 export const FLAVOR_HEADLINES = [
   'BREAKING: Startup claims AGI is "18 months away", again.',

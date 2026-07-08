@@ -13,6 +13,7 @@ const PERSIST_FIELDS = [
   'tree',
   'skin',
   'unlockedSkins',
+  'lang',
   'resets',
   'clicks',
   'allTimeCompute',

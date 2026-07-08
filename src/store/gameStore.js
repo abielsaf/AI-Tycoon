@@ -5,6 +5,7 @@ import { ACHIEVEMENTS } from '../data/achievements'
 import { EVENTS, FLAVOR_HEADLINES } from '../data/events'
 import { TREE, treeNodeCost } from '../data/tree'
 import { SKIN_MAP } from '../data/skins'
+import { t, tc, FLAVOR } from '../i18n'
 
 export const SAVE_VERSION = 2
 const START_MONEY = 20
@@ -191,6 +192,7 @@ const initialState = {
   tree: {}, // { nodeId: level } — ascension tree
   skin: 'matrix',
   unlockedSkins: ['matrix'],
+  lang: 'en',
   resets: 0,
   clicks: 0,
   allTimeCompute: 0,
@@ -212,7 +214,8 @@ function checkAchievements(state, stats) {
     if (state.achievements.includes(a.id)) continue
     if (a.check(state, stats)) {
       unlocked.push(a.id)
-      news = pushNews(news, `🏆 Achievement unlocked: ${a.name}`)
+      const name = tc(state.lang, 'achievements', a.id, 'name', a.name)
+      news = pushNews(news, t(state.lang, 'newsAch', { name }))
     }
   }
   if (!unlocked.length) return null
@@ -267,6 +270,8 @@ export const useGameStore = create((set) => ({
 
   setBuyMode: (mode) => set({ buyMode: mode }),
 
+  setLang: (lang) => set({ lang }),
+
   buyTreeNode: (id) =>
     set((s) => {
       const node = TREE.find((n) => n.id === id)
@@ -306,7 +311,12 @@ export const useGameStore = create((set) => ({
         money: merged.money,
         upgrades,
         stats,
-        news: pushNews(s.news, `✅ Purchased: ${u.name}`),
+        news: pushNews(
+          s.news,
+          t(s.lang, 'newsPurchased', {
+            name: tc(s.lang, 'upgrades', id, 'name', u.name),
+          })
+        ),
       }
     }),
 
@@ -333,8 +343,10 @@ export const useGameStore = create((set) => ({
       const stats = getStats(merged)
       const label =
         bought.length === 1
-          ? `✅ Purchased: ${bought[0].name}`
-          : `✅ Purchased ${bought.length} upgrades`
+          ? t(s.lang, 'newsPurchased', {
+              name: tc(s.lang, 'upgrades', bought[0].id, 'name', bought[0].name),
+            })
+          : t(s.lang, 'newsPurchasedN', { n: bought.length })
       return { money, upgrades, stats, news: pushNews(s.news, label) }
     }),
 
@@ -363,11 +375,12 @@ export const useGameStore = create((set) => ({
       if (nowSec >= state.nextEventAt) {
         const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)]
         patch.nextEventAt = nowSec + rand(EVENT_MIN, EVENT_MAX)
+        const headline = tc(state.lang, 'events', ev.id, 'headline', ev.headline)
         let news = state.news
         if (ev.cash) {
           const grant = Math.max(500, state.money * 0.1 + stats.moneyPerSec * 60)
           patch.money += grant
-          news = pushNews(news, ev.headline)
+          news = pushNews(news, headline)
         } else {
           patch.activeEvent = {
             id: ev.id,
@@ -376,13 +389,13 @@ export const useGameStore = create((set) => ({
             endsAt: nowSec + ev.duration,
             mods: ev.mods,
           }
-          news = pushNews(news, ev.headline)
+          news = pushNews(news, headline)
         }
         patch.news = news
-        // bump `n` so the toast/sound retrigger even on a repeated event
+        // store the event id; the toast localizes at render. bump `n` so the
+        // toast/sound retrigger even on a repeated event.
         patch.eventFlash = {
-          title: ev.title,
-          headline: ev.headline,
+          id: ev.id,
           good: !!ev.good,
           n: (state.eventFlash?.n || 0) + 1,
         }
@@ -404,7 +417,7 @@ export const useGameStore = create((set) => ({
         ...run,
         insights: s.insights + gain,
         resets: s.resets + 1,
-        news: pushNews(s.news, `🌌 Singularity Reset! +${gain} AI Insights.`),
+        news: pushNews(s.news, t(s.lang, 'newsReset', { n: gain })),
       }
       const stats = getStats(merged)
       const base = { ...run, insights: merged.insights, resets: merged.resets, stats, news: merged.news }
@@ -413,12 +426,12 @@ export const useGameStore = create((set) => ({
     }),
 
   addFlavorNews: () =>
-    set((s) => ({
-      news: pushNews(
-        s.news,
-        FLAVOR_HEADLINES[Math.floor(Math.random() * FLAVOR_HEADLINES.length)]
-      ),
-    })),
+    set((s) => {
+      const list = FLAVOR[s.lang] || FLAVOR_HEADLINES
+      return {
+        news: pushNews(s.news, list[Math.floor(Math.random() * list.length)]),
+      }
+    }),
 
   // --- save / load ---
   loadState: (data) =>

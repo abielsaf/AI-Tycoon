@@ -1,5 +1,6 @@
 import { useGameStore } from '../store/gameStore'
 import { fmt, fmtMoney } from '../utils/format'
+import { t } from '../i18n'
 
 function Stat({ label, value, accent }) {
   return (
@@ -19,23 +20,24 @@ export default function StatsBar() {
   const lifetime = useGameStore((s) => s.lifetimeCompute)
   const insights = useGameStore((s) => s.insights)
   const stats = useGameStore((s) => s.stats)
+  const lang = useGameStore((s) => s.lang)
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 border-b border-emerald-500/20 bg-black/40 px-2 py-1 backdrop-blur">
-      <Stat label="Money" value={fmtMoney(money)} accent="text-emerald-400" />
+      <Stat label={t(lang, 'statMoney')} value={fmtMoney(money)} accent="text-emerald-400" />
       <Stat
-        label="$ / sec"
+        label={t(lang, 'statPerSec')}
         value={fmtMoney(stats?.moneyPerSec || 0) + '/s'}
         accent="text-emerald-300/80"
       />
       <Stat
-        label="FLOPS / sec"
+        label={t(lang, 'statFlops')}
         value={fmt(stats?.flopsPerSec || 0) + '/s'}
         accent="text-cyan-300"
       />
-      <Stat label="Lifetime FLOPS" value={fmt(lifetime)} accent="text-cyan-400/70" />
+      <Stat label={t(lang, 'statLifetime')} value={fmt(lifetime)} accent="text-cyan-400/70" />
       <Stat
-        label="AI Insights"
+        label={t(lang, 'statInsights')}
         value={fmt(insights)}
         accent="text-fuchsia-400"
       />
