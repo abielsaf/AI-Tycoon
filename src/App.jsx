@@ -1,122 +1,75 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect } from 'react'
+import { useGameStore } from './store/gameStore'
+import { loadGame, saveGame } from './systems/saveSystem'
+import { startGameLoop } from './systems/gameLoop'
 
-function App() {
-  const [count, setCount] = useState(0)
+import StatsBar from './components/StatsBar'
+import NewsTicker from './components/NewsTicker'
+import HeatBar from './components/HeatBar'
+import ClickArea from './components/ClickArea'
+import BuildingList from './components/BuildingList'
+import UpgradePanel from './components/UpgradePanel'
+import PrestigePanel from './components/PrestigePanel'
+import AchievementsPanel from './components/AchievementsPanel'
+import SaveMenu from './components/SaveMenu'
+import OfflineModal from './components/OfflineModal'
+import ActiveEvent from './components/ActiveEvent'
+
+export default function App() {
+  useEffect(() => {
+    loadGame()
+    useGameStore.getState().recomputeStats()
+    saveGame() // persist fresh timestamp so a StrictMode re-mount won't double-grant offline
+    const stop = startGameLoop()
+    return stop
+  }, [])
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="mx-auto flex min-h-svh max-w-6xl flex-col text-slate-200">
+      {/* Header */}
+      <header className="flex flex-wrap items-center justify-between gap-2 px-3 py-2">
+        <div className="flex items-center gap-3">
+          <h1 className="text-xl font-black tracking-tight text-emerald-400">
+            AI<span className="text-slate-100"> TYCOON</span>
+            <span className="mono ml-2 text-[10px] font-normal text-emerald-600">
+              v0.1
+            </span>
+          </h1>
+          <ActiveEvent />
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+        <SaveMenu />
+      </header>
 
-      <div className="ticks"></div>
+      <StatsBar />
+      <NewsTicker />
+      <HeatBar />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Main */}
+      <main className="grid flex-1 grid-cols-1 gap-4 p-3 lg:grid-cols-[1fr_1.1fr_1fr]">
+        {/* Left: click + prestige + achievements */}
+        <div className="flex flex-col gap-4">
+          <ClickArea />
+          <PrestigePanel />
+          <AchievementsPanel />
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {/* Center: hardware */}
+        <div className="rounded-xl border border-white/5 bg-black/20 p-3">
+          <BuildingList />
+        </div>
+
+        {/* Right: upgrades */}
+        <div className="rounded-xl border border-white/5 bg-black/20 p-3">
+          <UpgradePanel />
+        </div>
+      </main>
+
+      <footer className="px-3 py-2 text-center text-[10px] text-slate-600">
+        Autosaves every 10s · built with React + Zustand · click the terminal to
+        generate compute
+      </footer>
+
+      <OfflineModal />
+    </div>
   )
 }
-
-export default App
