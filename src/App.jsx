@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { useGameStore } from './store/gameStore'
 import { loadGame, saveGame } from './systems/saveSystem'
 import { startGameLoop } from './systems/gameLoop'
@@ -113,6 +115,8 @@ export default function App() {
       <OfflineModal />
       <EventToast />
       <GuideModal open={guideOpen} onClose={closeGuide} />
+      <Analytics />
+      <SpeedInsights />
     </div>
   )
 }
