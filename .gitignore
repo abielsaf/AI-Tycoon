@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Internal resume/status doc — keep local, not on GitHub
+HANDOFF.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

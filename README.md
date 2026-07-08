@@ -6,7 +6,8 @@ sell them for money, reinvest in bigger hardware, fight the heat, and ascend
 through Singularity Resets.
 
 Built with **React 19 + Zustand + Vite + Tailwind**. No backend — everything
-runs in the browser and saves to `localStorage`.
+runs in the browser and saves to `localStorage`. Fully playable in **English and
+Spanish** (toggle in the header).
 
 ![AI Tycoon](docs/screenshot.png)
 
@@ -59,8 +60,29 @@ rebalance without touching game logic.
 
 ## Planned
 
-- Review game balance
-- Translate to Spanish
+1. **Verify autosave + "welcome back" on reload.** Confirm the 10s autosave
+   writes and the offline modal pops after truly closing/reopening the tab.
+   Load flow lives in `App.jsx` → `loadGame()` → `loadState()` (offline math);
+   note React StrictMode double-mounts the effect in dev, so test with
+   `npm run preview` (not `npm run dev`) — the modal only shows when elapsed
+   time away is over 30s.
+2. **Review game balance (progression too fast).** Prestige/ascension upgrades
+   are currently too cheap, so you reach the full game too quickly. Concrete
+   levers: `data/tree.js` node costs, the `pendingInsights` formula,
+   `PRESTIGE_UNLOCK`, and the building/upgrade cost curves.
+3. **Packaging (future).** Preliminary feasibility so it's not a blind start:
+   a **PWA** (installable, offline, shares the web save) is easiest and first;
+   a desktop **`.exe`** via **Tauri** is straightforward (its own storage, so
+   save transfer is via Export/Import); **Android** via Capacitor works from
+   Windows; **iOS** needs a Mac + Apple Developer account. No backend means no
+   automatic cross-platform sync — the save format already moves via
+   Export/Import.
+
+## Done
+
+English/Spanish support · sell-back hardware · 12 hardware tiers · prestige
+ascension tree + skins · market events with sound · new-player guide ·
+export/import saves · mobile layout.
 
 ## License
 
