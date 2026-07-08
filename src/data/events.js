@@ -7,6 +7,7 @@ export const EVENTS = [
     title: 'RAM Prices Spike',
     headline: '📈 DRAM shortage! Hardware costs +40% for 60s.',
     duration: 60,
+    good: false,
     mods: { costMult: 1.4 },
   },
   {
@@ -14,6 +15,7 @@ export const EVENTS = [
     title: 'Crypto Crash',
     headline: '💥 Crypto crashes — miners dump GPUs. Hardware -30% for 60s.',
     duration: 60,
+    good: true,
     mods: { costMult: 0.7 },
   },
   {
@@ -21,6 +23,7 @@ export const EVENTS = [
     title: 'AI Hype Cycle',
     headline: '🚀 Everyone wants AI! Revenue +50% for 60s.',
     duration: 60,
+    good: true,
     mods: { revenueMult: 1.5 },
   },
   {
@@ -28,6 +31,7 @@ export const EVENTS = [
     title: 'Model Goes Viral',
     headline: '🔥 Your demo hits the front page! FLOPS x2 for 45s.',
     duration: 45,
+    good: true,
     mods: { flopsMult: 2 },
   },
   {
@@ -35,6 +39,7 @@ export const EVENTS = [
     title: 'Heatwave',
     headline: '🌡️ Record temperatures! Cooling -25% for 60s.',
     duration: 60,
+    good: false,
     mods: { coolingMult: 0.75 },
   },
   {
@@ -42,6 +47,7 @@ export const EVENTS = [
     title: 'Power Grid Strain',
     headline: '⚡ Brownouts across the region. Production -30% for 45s.',
     duration: 45,
+    good: false,
     mods: { flopsMult: 0.7 },
   },
   {
@@ -49,6 +55,7 @@ export const EVENTS = [
     title: 'VC Funding Round',
     headline: '💰 A VC just wired you a war chest. Instant cash injection!',
     duration: 0,
+    good: true,
     cash: 0.15, // grants 15% of current net worth-ish (see store)
   },
 ]

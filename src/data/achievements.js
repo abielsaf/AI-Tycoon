@@ -48,4 +48,16 @@ export const ACHIEVEMENTS = [
     desc: 'Perform your first Singularity Reset.',
     check: (s) => s.resets >= 1,
   },
+  {
+    id: 'billionaire',
+    name: 'Ten Figures',
+    desc: 'Bank $1,000,000,000.',
+    check: (s) => s.money >= 1_000_000_000,
+  },
+  {
+    id: 'dyson',
+    name: 'Kardashev Ambitions',
+    desc: 'Build a Dyson Swarm Node.',
+    check: (s) => (s.buildings.dyson_node || 0) >= 1,
+  },
 ]

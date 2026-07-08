@@ -77,6 +77,22 @@ export const UPGRADES = [
     effect: [{ type: 'cooling_flat', amount: 5_000_000 }],
     req: { building: 'datacenter_wing', count: 2 },
   },
+  {
+    id: 'superconductor',
+    name: 'Superconducting Coolant',
+    desc: 'Zero-resistance heat transfer. Cooling capacity x2.',
+    cost: 20_000_000_000,
+    effect: [{ type: 'cooling_mult', amount: 2 }],
+    req: { building: 'cryo_plant', count: 2 },
+  },
+  {
+    id: 'orbital_radiators',
+    name: 'Orbital Radiators',
+    desc: 'Dump heat straight into the void of space. +20B cooling.',
+    cost: 400_000_000_000,
+    effect: [{ type: 'cooling_flat', amount: 20_000_000_000 }],
+    req: { building: 'dyson_node', count: 1 },
+  },
 
   // --- Building multipliers ---
   {
@@ -111,6 +127,30 @@ export const UPGRADES = [
     effect: [{ type: 'building_mult', target: 'pi', amount: 3 }],
     req: { building: 'pi', count: 10 },
   },
+  {
+    id: 'spiking_nets',
+    name: 'Spiking Neural Nets',
+    desc: 'Event-driven inference. Neuromorphic Arrays x2.',
+    cost: 1_500_000_000,
+    effect: [{ type: 'building_mult', target: 'neuromorphic', amount: 2 }],
+    req: { building: 'neuromorphic', count: 1 },
+  },
+  {
+    id: 'plasma_tuning',
+    name: 'Plasma Confinement Tuning',
+    desc: 'Squeeze more compute per reactor. Fusion Clusters x2.',
+    cost: 30_000_000_000,
+    effect: [{ type: 'building_mult', target: 'fusion_cluster', amount: 2 }],
+    req: { building: 'fusion_cluster', count: 1 },
+  },
+  {
+    id: 'swarm_scaling',
+    name: 'Self-Replicating Swarm',
+    desc: 'The nodes build more nodes. Dyson Swarm Nodes x2.',
+    cost: 500_000_000_000,
+    effect: [{ type: 'building_mult', target: 'dyson_node', amount: 2 }],
+    req: { building: 'dyson_node', count: 1 },
+  },
 
   // --- Global / revenue ---
   {
@@ -144,6 +184,22 @@ export const UPGRADES = [
     cost: 40_000_000,
     effect: [{ type: 'flops_mult', amount: 2 }],
     req: { building: 'quantum', count: 1 },
+  },
+  {
+    id: 'caas',
+    name: 'Compute-as-a-Service',
+    desc: 'Rent out every spare cycle. Revenue x2.',
+    cost: 800_000_000_000,
+    effect: [{ type: 'revenue_mult', amount: 2 }],
+    req: { building: 'fusion_cluster', count: 2 },
+  },
+  {
+    id: 'recursive_si',
+    name: 'Recursive Self-Improvement',
+    desc: 'The system rewrites its own compiler. All FLOPS x2.',
+    cost: 2_000_000_000_000,
+    effect: [{ type: 'flops_mult', amount: 2 }],
+    req: { building: 'dyson_node', count: 2 },
   },
 ]
 

@@ -89,3 +89,18 @@ body {
 .click-target:active {
   transform: scale(0.97);
 }
+
+/* event toast slide-in */
+@keyframes toastIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.event-toast {
+  animation: toastIn 0.28s ease-out;
+}

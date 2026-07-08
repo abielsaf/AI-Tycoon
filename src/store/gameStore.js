@@ -3,16 +3,26 @@ import { BUILDINGS, BUILDING_MAP } from '../data/buildings'
 import { UPGRADES, UPGRADE_MAP } from '../data/upgrades'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { EVENTS, FLAVOR_HEADLINES } from '../data/events'
+import { TREE, treeNodeCost } from '../data/tree'
+import { SKIN_MAP } from '../data/skins'
 
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 const START_MONEY = 20
 const PRICE = 1 // money per FLOP sold
 const BASE_COOLING = 25
 const BASE_CLICK = 1
-const INSIGHT_MULT_PER = 0.02 // +2% production per AI Insight
 export const PRESTIGE_UNLOCK = 2.5e8 // lifetime FLOPS needed to reset
 const OFFLINE_CAP = 8 * 3600 // max seconds of offline progress
 const OFFLINE_EFFICIENCY = 0.5
+
+// Money a fresh run starts with, boosted by the Seed Capital tree node (×8/lvl).
+function runStartMoney(tree) {
+  return START_MONEY * Math.pow(8, tree?.headstart || 0)
+}
+// Offline efficiency, boosted +8%/lvl by Cloud Sync, capped at 95%.
+function offlineEff(tree) {
+  return Math.min(0.95, OFFLINE_EFFICIENCY + (tree?.offline || 0) * 0.08)
+}
 const EVENT_MIN = 180 // seconds
 const EVENT_MAX = 300
 
@@ -56,7 +66,22 @@ export function getStats(state) {
     }
   }
 
-  const insightMult = 1 + state.insights * INSIGHT_MULT_PER
+  // Ascension tree: permanent, spent Insights. Mult effects compound per level.
+  let costDiscount = 1
+  for (const n of TREE) {
+    const lvl = state.tree?.[n.id] || 0
+    if (!lvl) continue
+    for (const e of n.effect) {
+      switch (e.type) {
+        case 'click_mult': clickMult *= Math.pow(e.amount, lvl); break
+        case 'flops_mult': flopsMult *= Math.pow(e.amount, lvl); break
+        case 'cooling_mult': coolingMult *= Math.pow(e.amount, lvl); break
+        case 'revenue_mult': revenueMult *= Math.pow(e.amount, lvl); break
+        case 'cost_discount': costDiscount *= Math.pow(e.amount, lvl); break
+        default: break // start_money / offline_add handled outside getStats
+      }
+    }
+  }
 
   let rawFlops = 0
   let heat = 0
@@ -75,10 +100,10 @@ export function getStats(state) {
   const heatPenalty = heat > cooling && heat > 0 ? cooling / heat : 1
 
   const flopsPerSec =
-    rawFlops * flopsMult * insightMult * heatPenalty * (ev.flopsMult || 1)
+    rawFlops * flopsMult * heatPenalty * (ev.flopsMult || 1)
   const revenue = revenueMult * (ev.revenueMult || 1)
   const moneyPerSec = flopsPerSec * PRICE * revenue
-  const finalClick = clickPower * clickMult * insightMult
+  const finalClick = clickPower * clickMult
 
   return {
     clickPower: finalClick,
@@ -88,8 +113,7 @@ export function getStats(state) {
     cooling,
     heatPenalty,
     revenue,
-    costMult: ev.costMult || 1,
-    insightMult,
+    costMult: (ev.costMult || 1) * costDiscount,
   }
 }
 
@@ -104,6 +128,16 @@ export function bulkCost(id, owned, count, costMult = 1) {
   let total = 0
   for (let k = 0; k < count; k++) total += buildingCost(id, owned + k, costMult)
   return total
+}
+
+const SELL_REFUND = 0.5 // fraction of base (event-free) price refunded on sale
+
+// Refund for selling the top `count` units (the most expensive ones owned).
+// Uses costMult=1 so market events never change what a sale is worth.
+export function sellValue(id, owned, count) {
+  let total = 0
+  for (let k = 0; k < count; k++) total += buildingCost(id, owned - 1 - k, 1)
+  return Math.floor(total * SELL_REFUND)
 }
 
 // How many of a building `money` can buy, and what it costs. Count is
@@ -129,9 +163,9 @@ export function upgradeReqMet(u, s) {
   return true
 }
 
-function freshRun() {
+function freshRun(tree) {
   return {
-    money: START_MONEY,
+    money: runStartMoney(tree),
     buildings: {},
     upgrades: [],
     lifetimeCompute: 0,
@@ -154,6 +188,9 @@ const initialState = {
   ...freshRun(),
   // persistent-across-prestige:
   insights: 0,
+  tree: {}, // { nodeId: level } — ascension tree
+  skin: 'matrix',
+  unlockedSkins: ['matrix'],
   resets: 0,
   clicks: 0,
   allTimeCompute: 0,
@@ -165,6 +202,7 @@ const initialState = {
   news: [],
   stats: null,
   lastOffline: null, // {seconds, money, compute} shown once on load
+  eventFlash: null, // {title, headline, good, n} — drives the toast + sound
 }
 
 function checkAchievements(state, stats) {
@@ -215,7 +253,46 @@ export const useGameStore = create((set) => ({
       return ach ? { ...base, ...ach } : base
     }),
 
+  sellBuilding: (id, count = 1) =>
+    set((s) => {
+      const owned = s.buildings[id] || 0
+      const n = Math.min(count, owned)
+      if (n < 1) return {}
+      const refund = sellValue(id, owned, n)
+      const buildings = { ...s.buildings, [id]: owned - n }
+      const merged = { ...s, money: s.money + refund, buildings }
+      const stats = getStats(merged)
+      return { money: merged.money, buildings, stats }
+    }),
+
   setBuyMode: (mode) => set({ buyMode: mode }),
+
+  buyTreeNode: (id) =>
+    set((s) => {
+      const node = TREE.find((n) => n.id === id)
+      if (!node) return {}
+      const level = s.tree[id] || 0
+      if (level >= node.maxLevel) return {}
+      const cost = treeNodeCost(node, level)
+      if (s.insights < cost) return {}
+      const tree = { ...s.tree, [id]: level + 1 }
+      const merged = { ...s, insights: s.insights - cost, tree }
+      return { insights: merged.insights, tree, stats: getStats(merged) }
+    }),
+
+  unlockSkin: (id) =>
+    set((s) => {
+      const skin = SKIN_MAP[id]
+      if (!skin || s.unlockedSkins.includes(id) || s.insights < skin.cost) return {}
+      return {
+        insights: s.insights - skin.cost,
+        unlockedSkins: [...s.unlockedSkins, id],
+        skin: id, // equip on unlock
+      }
+    }),
+
+  setSkin: (id) =>
+    set((s) => (s.unlockedSkins.includes(id) ? { skin: id } : {})),
 
   buyUpgrade: (id) =>
     set((s) => {
@@ -302,6 +379,13 @@ export const useGameStore = create((set) => ({
           news = pushNews(news, ev.headline)
         }
         patch.news = news
+        // bump `n` so the toast/sound retrigger even on a repeated event
+        patch.eventFlash = {
+          title: ev.title,
+          headline: ev.headline,
+          good: !!ev.good,
+          n: (state.eventFlash?.n || 0) + 1,
+        }
       }
 
       const merged = { ...state, ...patch }
@@ -314,7 +398,7 @@ export const useGameStore = create((set) => ({
     set((s) => {
       const gain = pendingInsights(s.lifetimeCompute)
       if (gain < 1) return {}
-      const run = freshRun()
+      const run = freshRun(s.tree)
       const merged = {
         ...s,
         ...run,
@@ -348,8 +432,9 @@ export const useGameStore = create((set) => ({
       const stats = getStats(merged)
       let lastOffline = null
       if (elapsed > 30 && stats.moneyPerSec > 0) {
-        const money = stats.moneyPerSec * elapsed * OFFLINE_EFFICIENCY
-        const compute = stats.flopsPerSec * elapsed * OFFLINE_EFFICIENCY
+        const eff = offlineEff(merged.tree)
+        const money = stats.moneyPerSec * elapsed * eff
+        const compute = stats.flopsPerSec * elapsed * eff
         merged.money += money
         merged.lifetimeCompute += compute
         merged.allTimeCompute += compute
@@ -365,7 +450,7 @@ export const useGameStore = create((set) => ({
 
   hardReset: () =>
     set(() => {
-      const fresh = { ...initialState, ...freshRun(), lastSave: Date.now() }
+      const fresh = { ...initialState, ...freshRun({}), lastSave: Date.now() }
       fresh.stats = getStats(fresh)
       return fresh
     }),

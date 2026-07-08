@@ -10,6 +10,9 @@ const PERSIST_FIELDS = [
   'upgrades',
   'lifetimeCompute',
   'insights',
+  'tree',
+  'skin',
+  'unlockedSkins',
   'resets',
   'clicks',
   'allTimeCompute',
@@ -54,7 +57,15 @@ export function loadGame() {
 // Future save migrations key off saveVersion.
 function migrate(data) {
   if (!data.saveVersion) data.saveVersion = 1
-  // (no migrations yet)
+  // v1 -> v2: Insights went from a passive +2%/each bonus to a spendable
+  // ascension-tree currency. Existing Insights carry over as the new balance;
+  // seed the new fields so old saves load cleanly.
+  if (data.saveVersion < 2) {
+    data.tree = data.tree || {}
+    data.skin = data.skin || 'matrix'
+    data.unlockedSkins = data.unlockedSkins || ['matrix']
+    data.saveVersion = 2
+  }
   return data
 }
 

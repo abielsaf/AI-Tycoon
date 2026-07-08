@@ -3,11 +3,13 @@ import { fmt, fmtMoney } from '../utils/format'
 
 function Stat({ label, value, accent }) {
   return (
-    <div className="flex flex-col items-start px-4 py-2">
+    <div className="flex flex-col items-start px-2 py-1.5 sm:px-4 sm:py-2">
       <span className="text-[10px] uppercase tracking-widest text-emerald-500/60">
         {label}
       </span>
-      <span className={`mono text-lg font-semibold ${accent}`}>{value}</span>
+      <span className={`mono text-base font-semibold sm:text-lg ${accent}`}>
+        {value}
+      </span>
     </div>
   )
 }
@@ -37,13 +39,6 @@ export default function StatsBar() {
         value={fmt(insights)}
         accent="text-fuchsia-400"
       />
-      {insights > 0 && (
-        <Stat
-          label="Insight Bonus"
-          value={`+${Math.round(insights * 2)}%`}
-          accent="text-fuchsia-300/70"
-        />
-      )}
     </div>
   )
 }

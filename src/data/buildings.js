@@ -84,6 +84,49 @@ export const BUILDINGS = [
     heat: 6_000_000,
     cooling: 0,
   },
+  {
+    id: 'neuromorphic',
+    name: 'Neuromorphic Array',
+    desc: 'Brain-inspired chips that sip power and think in spikes.',
+    baseCost: 300_000_000,
+    costMult: 1.16,
+    flops: 750_000_000,
+    heat: 190_000_000,
+    cooling: 0,
+  },
+  {
+    id: 'cryo_plant',
+    name: 'Cryogenic Plant',
+    desc: 'Liquid-helium loops. No compute — just brutal, absolute cold.',
+    baseCost: 5_000_000_000,
+    costMult: 1.12,
+    flops: 0,
+    heat: 0,
+    cooling: 3_000_000_000,
+  },
+  {
+    id: 'fusion_cluster',
+    name: 'Fusion-Powered Cluster',
+    desc: 'Bring your own star. Compute limited only by physics.',
+    baseCost: 5_000_000_000,
+    costMult: 1.17,
+    flops: 25_000_000_000,
+    heat: 6_500_000_000,
+    cooling: 0,
+  },
+  {
+    id: 'dyson_node',
+    name: 'Dyson Swarm Node',
+    desc: 'Compute in solar orbit, drinking raw sunlight.',
+    baseCost: 90_000_000_000,
+    costMult: 1.17,
+    flops: 900_000_000_000,
+    heat: 240_000_000_000,
+    cooling: 0,
+  },
 ]
+// ponytail: late-game cooling (cryo_plant + upgrades) is roughly tuned — the
+// heat penalty is a soft scale, not a wall, so imperfect balance just slows,
+// never bricks. Retune cooling numbers if endgame feels too punishing.
 
 export const BUILDING_MAP = Object.fromEntries(BUILDINGS.map((b) => [b.id, b]))
