@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { BUILDINGS, BUILDING_MAP } from '../data/buildings'
-import { UPGRADE_MAP } from '../data/upgrades'
+import { UPGRADES, UPGRADE_MAP } from '../data/upgrades'
 import { ACHIEVEMENTS } from '../data/achievements'
 import { EVENTS, FLAVOR_HEADLINES } from '../data/events'
 
@@ -120,6 +120,15 @@ export function maxAffordable(id, owned, money, costMult = 1) {
   return { count, cost }
 }
 
+export function upgradeReqMet(u, s) {
+  if (!u.req) return true
+  const r = u.req
+  if (r.building) return (s.buildings[r.building] || 0) >= r.count
+  if (r.clicks) return s.clicks >= r.clicks
+  if (r.money) return s.allTimeCompute >= r.money
+  return true
+}
+
 function freshRun() {
   return {
     money: START_MONEY,
@@ -222,6 +231,34 @@ export const useGameStore = create((set) => ({
         stats,
         news: pushNews(s.news, `✅ Purchased: ${u.name}`),
       }
+    }),
+
+  buyAllUpgrades: () =>
+    set((s) => {
+      const ownedSet = new Set(s.upgrades)
+      // cheapest first so the money buys as many as possible
+      const candidates = UPGRADES.filter(
+        (u) => !ownedSet.has(u.id) && upgradeReqMet(u, s)
+      ).sort((a, b) => a.cost - b.cost)
+
+      let money = s.money
+      const bought = []
+      for (const u of candidates) {
+        if (money < u.cost) continue
+        money -= u.cost
+        bought.push(u)
+        ownedSet.add(u.id)
+      }
+      if (!bought.length) return {}
+
+      const upgrades = [...ownedSet]
+      const merged = { ...s, money, upgrades }
+      const stats = getStats(merged)
+      const label =
+        bought.length === 1
+          ? `✅ Purchased: ${bought[0].name}`
+          : `✅ Purchased ${bought.length} upgrades`
+      return { money, upgrades, stats, news: pushNews(s.news, label) }
     }),
 
   tick: (dt, nowSec) =>

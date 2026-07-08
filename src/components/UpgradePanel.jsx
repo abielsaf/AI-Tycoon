@@ -1,31 +1,38 @@
-import { useGameStore } from '../store/gameStore'
+import { useGameStore, upgradeReqMet } from '../store/gameStore'
 import { UPGRADES } from '../data/upgrades'
 import { fmtMoney } from '../utils/format'
-
-function reqMet(u, s) {
-  if (!u.req) return true
-  const r = u.req
-  if (r.building) return (s.buildings[r.building] || 0) >= r.count
-  if (r.clicks) return s.clicks >= r.clicks
-  if (r.money) return s.allTimeCompute >= r.money
-  return true
-}
 
 export default function UpgradePanel() {
   const owned = useGameStore((s) => s.upgrades)
   const money = useGameStore((s) => s.money)
   const buy = useGameStore((s) => s.buyUpgrade)
+  const buyAll = useGameStore((s) => s.buyAllUpgrades)
   const state = useGameStore()
 
   const available = UPGRADES.filter(
-    (u) => !owned.includes(u.id) && reqMet(u, state)
+    (u) => !owned.includes(u.id) && upgradeReqMet(u, state)
   ).sort((a, b) => a.cost - b.cost)
+
+  const affordableCount = available.filter((u) => money >= u.cost).length
 
   return (
     <div className="flex flex-col gap-2">
-      <h2 className="px-1 text-xs font-bold uppercase tracking-widest text-fuchsia-500/70">
-        Upgrades <span className="text-slate-600">({owned.length} owned)</span>
-      </h2>
+      <div className="flex items-center justify-between px-1">
+        <h2 className="text-xs font-bold uppercase tracking-widest text-fuchsia-500/70">
+          Upgrades <span className="text-slate-600">({owned.length} owned)</span>
+        </h2>
+        <button
+          onClick={buyAll}
+          disabled={affordableCount === 0}
+          className={`mono rounded px-2 py-0.5 text-[11px] font-bold transition ${
+            affordableCount > 0
+              ? 'bg-fuchsia-500/80 text-black hover:bg-fuchsia-400'
+              : 'cursor-not-allowed border border-fuchsia-500/20 text-slate-600'
+          }`}
+        >
+          BUY ALL{affordableCount > 0 ? ` (${affordableCount})` : ''}
+        </button>
+      </div>
       {available.length === 0 && (
         <p className="px-1 text-[11px] text-slate-500">
           No upgrades available yet — buy more hardware to unlock them.
