@@ -6,9 +6,11 @@ const KEY = 'ai-tycoon-save'
 const PERSIST_FIELDS = [
   'saveVersion',
   'money',
+  'maxMoney',
   'buildings',
   'upgrades',
   'lifetimeCompute',
+  'runClicks',
   'insights',
   'tree',
   'skin',

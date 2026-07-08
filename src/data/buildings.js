@@ -1,8 +1,10 @@
 // Buildings: bought with Money. Produce FLOPS/s (auto-sold to Money) and Heat.
 // Cooling Unit produces no FLOPS but adds cooling capacity.
-// Design rule: FLOPS-per-dollar ROUGHLY DOUBLES each tier, so climbing tiers
-// accelerates income (the exponential engine). Cost scales 1.15x per unit owned.
-// ponytail: these numbers are the balance knobs — tuned for ~1h to first reset.
+// Design rule (SOFT GATE): FLOPS-per-dollar rises only ~1.3x per tier (not 2x),
+// so raw hardware plateaus mid-game and the ascension tree's ×FLOPS / ×revenue /
+// cheaper-hardware buffs are what push you into the top tiers. Cost scales 1.15x
+// per unit owned. ponytail: these baseCosts are balance knobs — validated via
+// sim.mjs to reach the top tier in ~2 resets and max the tree in ~5-8 resets.
 export const BUILDINGS = [
   {
     id: 'pi',
@@ -18,7 +20,7 @@ export const BUILDINGS = [
     id: 'office_pc',
     name: 'Used Office PC',
     desc: 'Refurbished corporate cast-offs. Reliable enough.',
-    baseCost: 130,
+    baseCost: 200,
     costMult: 1.15,
     flops: 5,
     heat: 3,
@@ -28,7 +30,7 @@ export const BUILDINGS = [
     id: 'gaming_rig',
     name: 'Gaming Rig',
     desc: 'RGB everything. Surprisingly good at matrix math.',
-    baseCost: 1_200,
+    baseCost: 2_700,
     costMult: 1.15,
     flops: 90,
     heat: 18,
@@ -48,7 +50,7 @@ export const BUILDINGS = [
     id: 'server_rack',
     name: 'Server Rack',
     desc: 'A wall of blade servers screaming for airflow.',
-    baseCost: 12_000,
+    baseCost: 43_000,
     costMult: 1.15,
     flops: 1_900,
     heat: 500,
@@ -58,7 +60,7 @@ export const BUILDINGS = [
     id: 'gpu_cluster',
     name: 'GPU Cluster',
     desc: 'Racks of accelerators. The real money printer.',
-    baseCost: 130_000,
+    baseCost: 700_000,
     costMult: 1.15,
     flops: 40_000,
     heat: 12_000,
@@ -68,7 +70,7 @@ export const BUILDINGS = [
     id: 'datacenter_wing',
     name: 'Data Center Wing',
     desc: 'A whole hall of hardware. You have arrived.',
-    baseCost: 1_500_000,
+    baseCost: 12_800_000,
     costMult: 1.15,
     flops: 950_000,
     heat: 260_000,
@@ -78,7 +80,7 @@ export const BUILDINGS = [
     id: 'quantum',
     name: 'Quantum Prototype',
     desc: 'Superposition go brrr. Runs near absolute zero.',
-    baseCost: 20_000_000,
+    baseCost: 260_000_000,
     costMult: 1.16,
     flops: 25_000_000,
     heat: 6_000_000,
@@ -88,7 +90,7 @@ export const BUILDINGS = [
     id: 'neuromorphic',
     name: 'Neuromorphic Array',
     desc: 'Brain-inspired chips that sip power and think in spikes.',
-    baseCost: 300_000_000,
+    baseCost: 6_000_000_000,
     costMult: 1.16,
     flops: 750_000_000,
     heat: 190_000_000,
@@ -108,7 +110,7 @@ export const BUILDINGS = [
     id: 'fusion_cluster',
     name: 'Fusion-Powered Cluster',
     desc: 'Bring your own star. Compute limited only by physics.',
-    baseCost: 5_000_000_000,
+    baseCost: 150_000_000_000,
     costMult: 1.17,
     flops: 25_000_000_000,
     heat: 6_500_000_000,
@@ -118,7 +120,7 @@ export const BUILDINGS = [
     id: 'dyson_node',
     name: 'Dyson Swarm Node',
     desc: 'Compute in solar orbit, drinking raw sunlight.',
-    baseCost: 90_000_000_000,
+    baseCost: 4_250_000_000_000,
     costMult: 1.17,
     flops: 900_000_000_000,
     heat: 240_000_000_000,

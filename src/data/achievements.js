@@ -1,3 +1,6 @@
+import { BUILDINGS } from './buildings'
+import { TREE } from './tree'
+
 // Achievements. `check(state, stats)` returns true when unlocked.
 export const ACHIEVEMENTS = [
   {
@@ -59,5 +62,17 @@ export const ACHIEVEMENTS = [
     name: 'Kardashev Ambitions',
     desc: 'Build a Dyson Swarm Node.',
     check: (s) => (s.buildings.dyson_node || 0) >= 1,
+  },
+  {
+    id: 'hands_off',
+    name: 'Hands Off',
+    desc: 'Own every hardware type in one run without clicking the terminal.',
+    check: (s) => (s.runClicks || 0) === 0 && BUILDINGS.every((b) => (s.buildings[b.id] || 0) >= 1),
+  },
+  {
+    id: 'ascended',
+    name: 'Fully Ascended',
+    desc: 'Max out every node of the Ascension Tree.',
+    check: (s) => TREE.every((n) => (s.tree?.[n.id] || 0) >= n.maxLevel),
   },
 ]

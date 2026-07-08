@@ -12,7 +12,7 @@ const START_MONEY = 20
 const PRICE = 1 // money per FLOP sold
 const BASE_COOLING = 25
 const BASE_CLICK = 1
-export const PRESTIGE_UNLOCK = 2.5e8 // lifetime FLOPS needed to reset
+export const PRESTIGE_UNLOCK = 2e5 // lifetime FLOPS needed to reset
 const OFFLINE_CAP = 8 * 3600 // max seconds of offline progress
 const OFFLINE_EFFICIENCY = 0.5
 
@@ -27,11 +27,22 @@ function offlineEff(tree) {
 const EVENT_MIN = 180 // seconds
 const EVENT_MAX = 300
 
-// ponytail: balance knobs above — tuned for ~1h to first Singularity Reset.
+// Seconds until the next market event. Pre-prestige (resets 0) fires them ~2x as
+// often — the cash grants (min 500) smooth the steeper early-game curve.
+function eventDelay(resets) {
+  const f = resets > 0 ? 1 : 0.5
+  return rand(EVENT_MIN * f, EVENT_MAX * f)
+}
 
+// ponytail: balance knobs above. First reset comes ~20min in; the loop is the
+// point (buffs → reach further each run), so insight income below is LOGARITHMIC
+// in lifetime, not sqrt. A sqrt of the endgame's quadrillions explodes 15 orders
+// of magnitude in one snowballing run and maxes the whole tree instantly; log
+// keeps per-reset income bounded (~a couple thousand) so maxing takes ~5-8 resets.
+// Validated in sim.mjs. Balance lives entirely in data/ + these constants.
 export function pendingInsights(lifetimeCompute) {
   if (lifetimeCompute < PRESTIGE_UNLOCK) return 0
-  return Math.floor(10 * Math.sqrt(lifetimeCompute / 1e8))
+  return Math.floor(180 * Math.log10(lifetimeCompute / PRESTIGE_UNLOCK) + 1)
 }
 
 // --- Pure derived stats. Depends only on `state` + current event mods. ---
@@ -164,14 +175,16 @@ export function upgradeReqMet(u, s) {
   return true
 }
 
-function freshRun(tree) {
+function freshRun(tree, resets = 0) {
   return {
     money: runStartMoney(tree),
+    maxMoney: runStartMoney(tree), // peak money this run — gates hardware reveal (sticky)
     buildings: {},
     upgrades: [],
     lifetimeCompute: 0,
+    runClicks: 0, // clicks made THIS run — resets on prestige (for no-click challenge)
     activeEvent: null,
-    nextEventAt: Date.now() / 1000 + rand(EVENT_MIN, EVENT_MAX),
+    nextEventAt: Date.now() / 1000 + eventDelay(resets),
   }
 }
 
@@ -233,6 +246,7 @@ export const useGameStore = create((set) => ({
       const gain = stats.clickPower
       const next = {
         clicks: s.clicks + 1,
+        runClicks: (s.runClicks || 0) + 1,
         money: s.money + gain * PRICE * stats.revenue,
         lifetimeCompute: s.lifetimeCompute + gain,
         allTimeCompute: s.allTimeCompute + gain,
@@ -374,7 +388,7 @@ export const useGameStore = create((set) => ({
       // event scheduling
       if (nowSec >= state.nextEventAt) {
         const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)]
-        patch.nextEventAt = nowSec + rand(EVENT_MIN, EVENT_MAX)
+        patch.nextEventAt = nowSec + eventDelay(state.resets)
         const headline = tc(state.lang, 'events', ev.id, 'headline', ev.headline)
         let news = state.news
         if (ev.cash) {
@@ -401,6 +415,9 @@ export const useGameStore = create((set) => ({
         }
       }
 
+      // peak money only grows; captures click/sell income on the next tick too
+      patch.maxMoney = Math.max(state.maxMoney || 0, patch.money)
+
       const merged = { ...state, ...patch }
       const ach = checkAchievements(merged, stats)
       if (ach) Object.assign(patch, ach)
@@ -411,7 +428,7 @@ export const useGameStore = create((set) => ({
     set((s) => {
       const gain = pendingInsights(s.lifetimeCompute)
       if (gain < 1) return {}
-      const run = freshRun(s.tree)
+      const run = freshRun(s.tree, s.resets + 1)
       const merged = {
         ...s,
         ...run,
@@ -440,7 +457,7 @@ export const useGameStore = create((set) => ({
       // recompute offline progress
       const now = Date.now()
       const elapsed = Math.min(OFFLINE_CAP, Math.max(0, (now - (data.lastSave || now)) / 1000))
-      merged.nextEventAt = now / 1000 + rand(EVENT_MIN, EVENT_MAX)
+      merged.nextEventAt = now / 1000 + eventDelay(merged.resets)
       merged.activeEvent = null
       const stats = getStats(merged)
       let lastOffline = null
@@ -453,6 +470,7 @@ export const useGameStore = create((set) => ({
         merged.allTimeCompute += compute
         lastOffline = { seconds: elapsed, money, compute }
       }
+      merged.maxMoney = Math.max(merged.maxMoney || 0, merged.money)
       merged.stats = stats
       merged.lastOffline = lastOffline
       merged.lastSave = now

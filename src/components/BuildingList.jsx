@@ -6,14 +6,16 @@ import { t, tc } from '../i18n'
 function Row({ b }) {
   const owned = useGameStore((s) => s.buildings[b.id] || 0)
   const money = useGameStore((s) => s.money)
+  const maxMoney = useGameStore((s) => s.maxMoney || 0)
   const costMult = useGameStore((s) => s.stats?.costMult || 1)
   const buyMode = useGameStore((s) => s.buyMode)
   const buy = useGameStore((s) => s.buyBuilding)
   const sell = useGameStore((s) => s.sellBuilding)
   const lang = useGameStore((s) => s.lang)
 
-  // hide buildings well beyond reach until the player is close (progressive reveal)
-  const revealed = owned > 0 || money >= b.baseCost * 0.4
+  // Progressive reveal, but sticky: once you've had enough cash to nearly afford
+  // it, it stays visible even if you spend down (peak money, not current).
+  const revealed = owned > 0 || maxMoney >= b.baseCost * 0.4
   if (!revealed) return null
 
   const affordableAll = maxAffordable(b.id, owned, money, costMult) // {count, cost}
@@ -63,8 +65,8 @@ function Row({ b }) {
           </div>
           <div className="mono mt-0.5 flex gap-3 text-[10px] text-slate-500">
             {b.flops > 0 && <span className="text-cyan-400/70">{fmt(b.flops)} FLOPS/s</span>}
-            {b.cooling > 0 && <span className="text-sky-400/70">+{fmt(b.cooling)} cooling</span>}
-            {b.heat > 0 && <span className="text-orange-400/60">{fmt(b.heat)} heat</span>}
+            {b.cooling > 0 && <span className="text-sky-400/70">+{fmt(b.cooling)} {t(lang, 'cooling')}</span>}
+            {b.heat > 0 && <span className="text-orange-400/60">{fmt(b.heat)} {t(lang, 'heat')}</span>}
           </div>
         </div>
         <div className="shrink-0 text-right">
