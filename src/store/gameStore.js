@@ -98,6 +98,28 @@ export function buildingCost(id, owned, costMult = 1) {
   return Math.ceil(b.baseCost * Math.pow(b.costMult, owned) * costMult)
 }
 
+// Total cost to buy `count` of a building starting from `owned`.
+// Sums per-unit (matches how buyBuilding charges) so the price is exact.
+export function bulkCost(id, owned, count, costMult = 1) {
+  let total = 0
+  for (let k = 0; k < count; k++) total += buildingCost(id, owned + k, costMult)
+  return total
+}
+
+// How many of a building `money` can buy, and what it costs. Count is
+// logarithmically bounded, so this loop stays small.
+export function maxAffordable(id, owned, money, costMult = 1) {
+  let count = 0
+  let cost = 0
+  while (count < 100000) {
+    const next = buildingCost(id, owned + count, costMult)
+    if (cost + next > money) break
+    cost += next
+    count++
+  }
+  return { count, cost }
+}
+
 function freshRun() {
   return {
     money: START_MONEY,
@@ -129,6 +151,7 @@ const initialState = {
   achievements: [],
   playtime: 0,
   // meta:
+  buyMode: 1, // 1 | 10 | 'max' — UI only, not persisted
   lastSave: Date.now(),
   news: [],
   stats: null,
@@ -169,18 +192,21 @@ export const useGameStore = create((set) => ({
       return ach ? { ...next, ...ach } : next
     }),
 
-  buyBuilding: (id) =>
+  buyBuilding: (id, count = 1) =>
     set((s) => {
+      if (count < 1) return {}
       const owned = s.buildings[id] || 0
-      const cost = buildingCost(id, owned, s.stats?.costMult || 1)
+      const cost = bulkCost(id, owned, count, s.stats?.costMult || 1)
       if (s.money < cost) return {}
-      const buildings = { ...s.buildings, [id]: owned + 1 }
+      const buildings = { ...s.buildings, [id]: owned + count }
       const merged = { ...s, money: s.money - cost, buildings }
       const stats = getStats(merged)
       const base = { money: merged.money, buildings, stats }
       const ach = checkAchievements({ ...merged, stats }, stats)
       return ach ? { ...base, ...ach } : base
     }),
+
+  setBuyMode: (mode) => set({ buyMode: mode }),
 
   buyUpgrade: (id) =>
     set((s) => {
