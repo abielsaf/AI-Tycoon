@@ -16,7 +16,7 @@ export default function NewsTicker() {
         ● {t(lang, 'live')}
       </div>
       <div className="relative flex-1 overflow-hidden py-1.5">
-        <div className="ticker-track mono text-xs text-emerald-200/80">
+        <div className="ticker-track mono text-[13px] sm:text-xs text-emerald-200/90">
           <span className="px-6">{line}</span>
           <span className="px-6">{line}</span>
         </div>

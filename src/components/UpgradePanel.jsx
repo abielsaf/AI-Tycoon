@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useGameStore, upgradeReqMet } from '../store/gameStore'
-import { UPGRADES } from '../data/upgrades'
+import { UPGRADES, UPGRADE_MAP } from '../data/upgrades'
 import { fmtMoney } from '../utils/format'
 import { t, tc } from '../i18n'
 
@@ -10,6 +11,7 @@ export default function UpgradePanel() {
   const buyAll = useGameStore((s) => s.buyAllUpgrades)
   const lang = useGameStore((s) => s.lang)
   const state = useGameStore()
+  const [showOwned, setShowOwned] = useState(false)
 
   const available = UPGRADES.filter(
     (u) => !owned.includes(u.id) && upgradeReqMet(u, state)
@@ -22,7 +24,13 @@ export default function UpgradePanel() {
       <div className="flex items-center justify-between px-1">
         <h2 className="text-xs font-bold uppercase tracking-widest text-fuchsia-500/70">
           {t(lang, 'upgrades')}{' '}
-          <span className="text-slate-600">{t(lang, 'ownedN', { n: owned.length })}</span>
+          <button
+            onClick={() => setShowOwned((v) => !v)}
+            disabled={owned.length === 0}
+            className={`normal-case tracking-normal ${owned.length ? 'text-slate-500 hover:text-fuchsia-400' : 'text-slate-600'}`}
+          >
+            {t(lang, 'ownedN', { n: owned.length })} {owned.length > 0 && (showOwned ? '▾' : '▸')}
+          </button>
         </h2>
         <button
           onClick={buyAll}
@@ -36,6 +44,23 @@ export default function UpgradePanel() {
           {t(lang, 'buyAll')}{affordableCount > 0 ? ` (${affordableCount})` : ''}
         </button>
       </div>
+      {showOwned && owned.length > 0 && (
+        <div className="flex flex-col gap-1 rounded-lg border border-fuchsia-500/20 bg-fuchsia-950/10 p-1.5">
+          {owned
+            .map((id) => UPGRADE_MAP[id])
+            .filter(Boolean)
+            .map((u) => (
+              <div key={u.id} className="px-1.5 py-0.5">
+                <div className="text-[12px] font-semibold text-fuchsia-200/90">
+                  ✓ {tc(lang, 'upgrades', u.id, 'name', u.name)}
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {tc(lang, 'upgrades', u.id, 'desc', u.desc)}
+                </div>
+              </div>
+            ))}
+        </div>
+      )}
       {available.length === 0 && (
         <p className="px-1 text-[11px] text-slate-500">
           {t(lang, 'noUpgrades')}

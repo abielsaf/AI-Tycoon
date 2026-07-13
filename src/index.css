@@ -72,6 +72,12 @@ body {
   white-space: nowrap;
   animation: ticker 40s linear infinite;
 }
+/* slow the scroll on phones so headlines are readable */
+@media (max-width: 640px) {
+  .ticker-track {
+    animation-duration: 70s;
+  }
+}
 
 @keyframes pulseGlow {
   0%,
