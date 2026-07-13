@@ -52,6 +52,7 @@ export default function App() {
   // recolors the grid backdrop too and doesn't trap fixed-position overlays.
   useEffect(() => {
     document.documentElement.style.filter = SKIN_MAP[skin]?.filter || 'none'
+    document.documentElement.style.setProperty('--skin-unfilter', SKIN_MAP[skin]?.unfilter || 'none')
   }, [skin])
 
   return (
@@ -74,7 +75,7 @@ export default function App() {
             title={t(lang, 'guide')}
             className="rounded border border-slate-600/60 px-2.5 py-1 text-[11px] text-slate-300 transition hover:border-emerald-500/60 hover:text-emerald-300"
           >
-            ❓ {t(lang, 'guide')}
+            <span style={{ filter: 'var(--skin-unfilter, none)' }}>❓</span> {t(lang, 'guide')}
           </button>
           <MuteToggle />
           <SaveMenu />

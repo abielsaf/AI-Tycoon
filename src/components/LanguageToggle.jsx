@@ -34,7 +34,10 @@ export default function LanguageToggle() {
       title={lang === 'en' ? 'Cambiar a Español' : 'Switch to English'}
       className="mono flex items-center gap-1.5 rounded border border-slate-600/60 px-2 py-1 text-[11px] font-bold text-slate-300 transition hover:border-emerald-500/60 hover:text-emerald-300"
     >
-      {lang === 'en' ? <FlagUK /> : <FlagES />}
+      {/* cancel the skin's root filter so the flags keep true colors */}
+      <span style={{ filter: 'var(--skin-unfilter, none)' }} className="flex">
+        {lang === 'en' ? <FlagUK /> : <FlagES />}
+      </span>
       {lang === 'en' ? 'EN' : 'ES'}
     </button>
   )
