@@ -77,9 +77,14 @@ export function wipeSave() {
 }
 
 // --- Export / Import as Base64 text ---
-export function exportSave() {
+// The raw base64 save string — for clipboard copy or manual paste.
+export function exportString() {
   const json = JSON.stringify(snapshot())
-  const b64 = btoa(unescape(encodeURIComponent(json)))
+  return btoa(unescape(encodeURIComponent(json)))
+}
+
+export function exportSave() {
+  const b64 = exportString()
   const blob = new Blob([b64], { type: 'text/plain' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
